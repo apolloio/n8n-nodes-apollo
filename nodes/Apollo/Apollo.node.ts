@@ -225,17 +225,13 @@ export class Apollo implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-		const credentials = await this.getCredentials('apolloApi');
-		const apiKey = credentials.apiKey as string;
-
 		const results: INodeExecutionData[] = [];
 
 		for (let i = 0; i < items.length; i++) {
 			const resource = this.getNodeParameter('resource', i) as string;
 			const operation = this.getNodeParameter('operation', i) as string;
 
-			const jsonHeaders = { 'Content-Type': 'application/json', 'X-Api-Key': apiKey };
-
+	
 			try {
 				let responseData: unknown;
 
@@ -261,10 +257,9 @@ export class Apollo implements INodeType {
 					if (organizationDomain) body.organization_domain = organizationDomain;
 					if (linkedinUrl) body.linkedin_url = linkedinUrl;
 
-					responseData = await this.helpers.httpRequest({
+					responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'apolloApi', {
 						method: 'POST',
 						url: `${APOLLO_API_BASE}/people/match`,
-						headers: jsonHeaders,
 						body,
 					});
 				} else if (resource === 'person' && operation === 'bulkEnrich') {
@@ -278,19 +273,17 @@ export class Apollo implements INodeType {
 						});
 					}
 
-					responseData = await this.helpers.httpRequest({
+					responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'apolloApi', {
 						method: 'POST',
 						url: `${APOLLO_API_BASE}/people/bulk_match`,
-						headers: jsonHeaders,
 						body: { details: people },
 					});
 				} else if (resource === 'organization' && operation === 'enrich') {
 					const domain = this.getNodeParameter('domain', i) as string;
 
-					responseData = await this.helpers.httpRequest({
+					responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'apolloApi', {
 						method: 'GET',
 						url: `${APOLLO_API_BASE}/organizations/enrich`,
-						headers: { 'X-Api-Key': apiKey },
 						qs: { domain },
 					});
 				} else if (resource === 'organization' && operation === 'bulkEnrich') {
@@ -307,10 +300,9 @@ export class Apollo implements INodeType {
 						});
 					}
 
-					responseData = await this.helpers.httpRequest({
+					responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'apolloApi', {
 						method: 'POST',
 						url: `${APOLLO_API_BASE}/organizations/bulk_enrich`,
-						headers: jsonHeaders,
 						body: { domains },
 					});
 				} else {

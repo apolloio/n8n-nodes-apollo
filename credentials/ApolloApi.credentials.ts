@@ -1,4 +1,4 @@
-import type { ICredentialType, INodeProperties } from 'n8n-workflow';
+import type { IAuthenticateGeneric, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class ApolloApi implements ICredentialType {
 	name = 'apolloApi';
@@ -15,4 +15,12 @@ export class ApolloApi implements ICredentialType {
 			description: 'Your Apollo.io API key. Find it at apollo.io → Settings → Integrations → API.',
 		},
 	];
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			headers: {
+				'X-Api-Key': '={{$credentials.apiKey}}',
+			},
+		},
+	};
 }
