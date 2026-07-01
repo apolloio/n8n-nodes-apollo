@@ -1,0 +1,53 @@
+{
+  "name": "n8n-nodes-apollo",
+  "version": "0.1.0",
+  "description": "Official n8n community node for Apollo.io — enrich people and organizations from Apollo's 275M+ contact database.",
+  "keywords": [
+    "n8n-community-node-package",
+    "apollo",
+    "apollo-io",
+    "enrichment",
+    "sales",
+    "leads"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/apolloio/n8n-nodes-apollo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apolloio/n8n-nodes-apollo.git"
+  },
+  "author": {
+    "name": "Apollo.io",
+    "email": "support@apollo.io"
+  },
+  "engines": {
+    "node": ">=18.10",
+    "pnpm": ">=9.1"
+  },
+  "packageManager": "pnpm@9.1.4",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ApolloApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Apollo/Apollo.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "gulp": "^4.0.0",
+    "n8n-core": "*",
+    "n8n-workflow": "^2.16.0",
+    "typescript": "^5.9.3"
+  }
+}
