@@ -4,7 +4,6 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
-	IRequestOptions,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
@@ -235,13 +234,7 @@ export class Apollo implements INodeType {
 			const resource = this.getNodeParameter('resource', i) as string;
 			const operation = this.getNodeParameter('operation', i) as string;
 
-			const baseOptions: IRequestOptions = {
-				headers: {
-					'Content-Type': 'application/json',
-					'X-Api-Key': apiKey,
-				},
-				json: true,
-			};
+			const jsonHeaders = { 'Content-Type': 'application/json', 'X-Api-Key': apiKey };
 
 			try {
 				let responseData: unknown;
@@ -268,10 +261,10 @@ export class Apollo implements INodeType {
 					if (organizationDomain) body.organization_domain = organizationDomain;
 					if (linkedinUrl) body.linkedin_url = linkedinUrl;
 
-					responseData = await this.helpers.request({
-						...baseOptions,
+					responseData = await this.helpers.httpRequest({
 						method: 'POST',
 						url: `${APOLLO_API_BASE}/people/match`,
+						headers: jsonHeaders,
 						body,
 					});
 				} else if (resource === 'person' && operation === 'bulkEnrich') {
@@ -285,19 +278,19 @@ export class Apollo implements INodeType {
 						});
 					}
 
-					responseData = await this.helpers.request({
-						...baseOptions,
+					responseData = await this.helpers.httpRequest({
 						method: 'POST',
 						url: `${APOLLO_API_BASE}/people/bulk_match`,
+						headers: jsonHeaders,
 						body: { details: people },
 					});
 				} else if (resource === 'organization' && operation === 'enrich') {
 					const domain = this.getNodeParameter('domain', i) as string;
 
-					responseData = await this.helpers.request({
-						...baseOptions,
+					responseData = await this.helpers.httpRequest({
 						method: 'GET',
 						url: `${APOLLO_API_BASE}/organizations/enrich`,
+						headers: { 'X-Api-Key': apiKey },
 						qs: { domain },
 					});
 				} else if (resource === 'organization' && operation === 'bulkEnrich') {
@@ -314,10 +307,10 @@ export class Apollo implements INodeType {
 						});
 					}
 
-					responseData = await this.helpers.request({
-						...baseOptions,
+					responseData = await this.helpers.httpRequest({
 						method: 'POST',
 						url: `${APOLLO_API_BASE}/organizations/bulk_enrich`,
+						headers: jsonHeaders,
 						body: { domains },
 					});
 				} else {
