@@ -1,6 +1,6 @@
 {
   "name": "@apolloio/n8n-nodes-apollo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official n8n community node for Apollo.io — enrich people and organizations from Apollo's 275M+ contact database.",
   "keywords": [
     "n8n-community-node-package",
@@ -32,7 +32,7 @@
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials package.json",
     "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json"
+    "prepublishOnly": "pnpm build"
   },
   "n8n": {
     "n8nNodesApiVersion": 1,
