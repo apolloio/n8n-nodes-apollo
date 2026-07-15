@@ -52,7 +52,6 @@
     "@types/node": "^20.19.43",
     "gulp": "^4.0.0",
     "jest": "^30.4.2",
-    "n8n-core": "*",
     "n8n-workflow": "^2.16.0",
     "ts-jest": "^29.4.11",
     "typescript": "^5.9.3"
