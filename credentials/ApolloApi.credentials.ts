@@ -1,4 +1,4 @@
-import type { IAuthenticateGeneric, ICredentialType, INodeProperties } from 'n8n-workflow';
+import type { IAuthenticateGeneric, ICredentialTestRequest, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class ApolloApi implements ICredentialType {
 	name = 'apolloApi';
@@ -21,6 +21,14 @@ export class ApolloApi implements ICredentialType {
 			headers: {
 				'X-Api-Key': '={{$credentials.apiKey}}',
 			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://api.apollo.io/api/v1',
+			url: '/users/api_profile',
+			method: 'GET',
 		},
 	};
 }
