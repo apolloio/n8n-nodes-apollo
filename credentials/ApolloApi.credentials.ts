@@ -3,6 +3,7 @@ import type { IAuthenticateGeneric, ICredentialTestRequest, ICredentialType, INo
 export class ApolloApi implements ICredentialType {
 	name = 'apolloApi';
 	displayName = 'Apollo API';
+	icon = 'file:apollo.svg' as const;
 	documentationUrl = 'https://docs.apollo.io/reference/authentication';
 	properties: INodeProperties[] = [
 		{

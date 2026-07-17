@@ -4,8 +4,9 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 const BASE = 'https://api.apollo.io/api/v1';
 
@@ -35,9 +36,10 @@ export class Apollo implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Interact with Apollo.io — prospect, enrich, and manage your entire sales workflow',
+		usableAsTool: true,
 		defaults: { name: 'Apollo' },
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [{ name: 'apolloApi', required: true }],
 		properties: [
 			// ── Resource ──────────────────────────────────────────────────────────
@@ -73,8 +75,8 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['person'] } },
 				options: [
-					{ name: 'Enrich', value: 'enrich', description: 'Enrich a single person by email, name, or LinkedIn URL', action: 'Enrich a person' },
 					{ name: 'Bulk Enrich', value: 'bulkEnrich', description: 'Enrich up to 10 people in one call', action: 'Bulk enrich people' },
+					{ name: 'Enrich', value: 'enrich', description: 'Enrich a single person by email, name, or LinkedIn URL', action: 'Enrich a person' },
 					{ name: 'Get', value: 'get', description: 'Get complete person info by ID', action: 'Get a person' },
 					{ name: 'Search', value: 'search', description: 'Search for people using filters', action: 'Search people' },
 				],
@@ -84,15 +86,15 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['contact'] } },
 				options: [
-					{ name: 'Create', value: 'create', action: 'Create a contact' },
 					{ name: 'Bulk Create', value: 'bulkCreate', action: 'Bulk create contacts' },
-					{ name: 'Update', value: 'update', action: 'Update a contact' },
 					{ name: 'Bulk Update', value: 'bulkUpdate', action: 'Bulk update contacts' },
+					{ name: 'Create', value: 'create', action: 'Create a contact' },
 					{ name: 'Get', value: 'get', action: 'Get a contact' },
-					{ name: 'Search', value: 'search', action: 'Search contacts' },
-					{ name: 'Update Stage', value: 'updateStage', description: 'Update stage for multiple contacts', action: 'Update contact stage' },
-					{ name: 'Update Owner', value: 'updateOwner', description: 'Reassign owner for multiple contacts', action: 'Update contact owner' },
 					{ name: 'List Stages', value: 'listStages', action: 'List contact stages' },
+					{ name: 'Search', value: 'search', action: 'Search contacts' },
+					{ name: 'Update', value: 'update', action: 'Update a contact' },
+					{ name: 'Update Owner', value: 'updateOwner', description: 'Reassign owner for multiple contacts', action: 'Update contact owner' },
+					{ name: 'Update Stage', value: 'updateStage', description: 'Update stage for multiple contacts', action: 'Update contact stage' },
 				],
 				default: 'search',
 			},
@@ -100,14 +102,14 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['account'] } },
 				options: [
-					{ name: 'Create', value: 'create', action: 'Create an account' },
 					{ name: 'Bulk Create', value: 'bulkCreate', action: 'Bulk create accounts' },
-					{ name: 'Update', value: 'update', action: 'Update an account' },
 					{ name: 'Bulk Update', value: 'bulkUpdate', action: 'Bulk update accounts' },
+					{ name: 'Create', value: 'create', action: 'Create an account' },
 					{ name: 'Get', value: 'get', action: 'Get an account' },
-					{ name: 'Search', value: 'search', action: 'Search accounts' },
-					{ name: 'Update Owner', value: 'updateOwner', description: 'Reassign owner for multiple accounts', action: 'Update account owner' },
 					{ name: 'List Stages', value: 'listStages', action: 'List account stages' },
+					{ name: 'Search', value: 'search', action: 'Search accounts' },
+					{ name: 'Update', value: 'update', action: 'Update an account' },
+					{ name: 'Update Owner', value: 'updateOwner', description: 'Reassign owner for multiple accounts', action: 'Update account owner' },
 				],
 				default: 'search',
 			},
@@ -115,11 +117,11 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['organization'] } },
 				options: [
-					{ name: 'Enrich', value: 'enrich', action: 'Enrich an organization' },
 					{ name: 'Bulk Enrich', value: 'bulkEnrich', action: 'Bulk enrich organizations' },
+					{ name: 'Enrich', value: 'enrich', action: 'Enrich an organization' },
 					{ name: 'Get', value: 'get', action: 'Get complete organization info' },
-					{ name: 'Search', value: 'search', action: 'Search organizations' },
 					{ name: 'Get Job Postings', value: 'jobPostings', action: 'Get job postings for an organization' },
+					{ name: 'Search', value: 'search', action: 'Search organizations' },
 				],
 				default: 'enrich',
 			},
@@ -128,11 +130,11 @@ export class Apollo implements INodeType {
 				displayOptions: { show: { resource: ['deal'] } },
 				options: [
 					{ name: 'Create', value: 'create', action: 'Create a deal' },
-					{ name: 'Update', value: 'update', action: 'Update a deal' },
 					{ name: 'Get', value: 'get', action: 'Get a deal' },
+					{ name: 'Get Contact Deals', value: 'contactDeals', description: 'Get deals associated with a contact', action: 'Get contact deals' },
 					{ name: 'List All', value: 'list', action: 'List all deals' },
 					{ name: 'List Stages', value: 'listStages', action: 'List deal stages' },
-					{ name: 'Get Contact Deals', value: 'contactDeals', description: 'Get deals associated with a contact', action: 'Get contact deals' },
+					{ name: 'Update', value: 'update', action: 'Update a deal' },
 				],
 				default: 'list',
 			},
@@ -140,15 +142,15 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['sequence'] } },
 				options: [
-					{ name: 'Create', value: 'create', action: 'Create a sequence' },
-					{ name: 'Update', value: 'update', action: 'Update a sequence' },
-					{ name: 'Search', value: 'search', action: 'Search sequences' },
 					{ name: 'Activate', value: 'activate', action: 'Activate a sequence' },
-					{ name: 'Deactivate', value: 'deactivate', action: 'Deactivate a sequence' },
-					{ name: 'Archive', value: 'archive', action: 'Archive a sequence' },
 					{ name: 'Add Contact', value: 'addContact', action: 'Add contact to sequence' },
-					{ name: 'Remove Contact', value: 'removeContact', action: 'Remove contact from sequence' },
+					{ name: 'Archive', value: 'archive', action: 'Archive a sequence' },
+					{ name: 'Create', value: 'create', action: 'Create a sequence' },
+					{ name: 'Deactivate', value: 'deactivate', action: 'Deactivate a sequence' },
 					{ name: 'List Email Schedules', value: 'listSchedules', action: 'List email schedules' },
+					{ name: 'Remove Contact', value: 'removeContact', action: 'Remove contact from sequence' },
+					{ name: 'Search', value: 'search', action: 'Search sequences' },
+					{ name: 'Update', value: 'update', action: 'Update a sequence' },
 				],
 				default: 'search',
 			},
@@ -156,13 +158,13 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['task'] } },
 				options: [
-					{ name: 'Create', value: 'create', action: 'Create a task' },
 					{ name: 'Bulk Create', value: 'bulkCreate', action: 'Bulk create tasks' },
-					{ name: 'Update', value: 'update', action: 'Update a task' },
+					{ name: 'Complete', value: 'complete', action: 'Complete a task' },
+					{ name: 'Create', value: 'create', action: 'Create a task' },
 					{ name: 'Get', value: 'get', action: 'Get a task' },
 					{ name: 'Search', value: 'search', action: 'Search tasks' },
-					{ name: 'Complete', value: 'complete', action: 'Complete a task' },
 					{ name: 'Skip', value: 'skip', action: 'Skip a task' },
+					{ name: 'Update', value: 'update', action: 'Update a task' },
 				],
 				default: 'search',
 			},
@@ -171,10 +173,10 @@ export class Apollo implements INodeType {
 				displayOptions: { show: { resource: ['email'] } },
 				options: [
 					{ name: 'Create Draft', value: 'create', action: 'Create an email draft' },
-					{ name: 'Send Now', value: 'sendNow', action: 'Send email now' },
-					{ name: 'Get Send Status', value: 'getSendStatus', action: 'Get email send status' },
 					{ name: 'Get Activities', value: 'getActivities', action: 'Get email activities' },
+					{ name: 'Get Send Status', value: 'getSendStatus', action: 'Get email send status' },
 					{ name: 'Search', value: 'search', action: 'Search outreach emails' },
+					{ name: 'Send Now', value: 'sendNow', action: 'Send email now' },
 				],
 				default: 'create',
 			},
@@ -183,8 +185,8 @@ export class Apollo implements INodeType {
 				displayOptions: { show: { resource: ['call'] } },
 				options: [
 					{ name: 'Create', value: 'create', action: 'Create a call record' },
-					{ name: 'Update', value: 'update', action: 'Update a call record' },
 					{ name: 'Search', value: 'search', action: 'Search calls' },
+					{ name: 'Update', value: 'update', action: 'Update a call record' },
 				],
 				default: 'search',
 			},
@@ -192,10 +194,10 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['conversation'] } },
 				options: [
-					{ name: 'Search', value: 'search', action: 'Search conversations' },
-					{ name: 'Get', value: 'get', action: 'Get a conversation' },
 					{ name: 'Export', value: 'export', action: 'Export conversations' },
+					{ name: 'Get', value: 'get', action: 'Get a conversation' },
 					{ name: 'Get Export', value: 'getExport', description: 'Poll async export result', action: 'Get conversation export' },
+					{ name: 'Search', value: 'search', action: 'Search conversations' },
 				],
 				default: 'search',
 			},
@@ -203,11 +205,11 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['label'] } },
 				options: [
-					{ name: 'Get All', value: 'getAll', action: 'Get all labels' },
-					{ name: 'Create', value: 'create', action: 'Create a label' },
-					{ name: 'Update', value: 'update', action: 'Update a label' },
 					{ name: 'Add Entities', value: 'addEntities', action: 'Add records to a label' },
+					{ name: 'Create', value: 'create', action: 'Create a label' },
+					{ name: 'Get Many', value: 'getAll', action: 'Get many labels' },
 					{ name: 'Remove Entities', value: 'removeEntities', action: 'Remove records from a label' },
+					{ name: 'Update', value: 'update', action: 'Update a label' },
 				],
 				default: 'getAll',
 			},
@@ -215,7 +217,7 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['note'] } },
 				options: [
-					{ name: 'Get All', value: 'getAll', action: 'Get all notes' },
+					{ name: 'Get Many', value: 'getAll', action: 'Get many notes' },
 				],
 				default: 'getAll',
 			},
@@ -223,9 +225,9 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['field'] } },
 				options: [
-					{ name: 'Get All', value: 'getAll', action: 'Get all fields' },
-					{ name: 'Get Custom Fields', value: 'getCustomFields', action: 'Get all custom fields' },
 					{ name: 'Create', value: 'create', action: 'Create a custom field' },
+					{ name: 'Get Custom Fields', value: 'getCustomFields', action: 'Get all custom fields' },
+					{ name: 'Get Many', value: 'getAll', action: 'Get many fields' },
 				],
 				default: 'getAll',
 			},
@@ -234,8 +236,8 @@ export class Apollo implements INodeType {
 				displayOptions: { show: { resource: ['user'] } },
 				options: [
 					{ name: 'Get Profile', value: 'getProfile', action: 'Get current user profile' },
-					{ name: 'List Users', value: 'list', action: 'List all users' },
 					{ name: 'List Email Accounts', value: 'listEmailAccounts', action: 'List email accounts' },
+					{ name: 'List Users', value: 'list', action: 'List all users' },
 				],
 				default: 'getProfile',
 			},
@@ -243,8 +245,8 @@ export class Apollo implements INodeType {
 				displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true,
 				displayOptions: { show: { resource: ['analytics'] } },
 				options: [
-					{ name: 'Query Report', value: 'queryReport', description: 'Query an analytics sync report', action: 'Query analytics report' },
 					{ name: 'Get API Usage', value: 'getUsage', action: 'Get API usage stats and rate limits' },
+					{ name: 'Query Report', value: 'queryReport', description: 'Query an analytics sync report', action: 'Query analytics report' },
 				],
 				default: 'queryReport',
 			},
@@ -799,7 +801,7 @@ export class Apollo implements INodeType {
 				name: 'labelEntityType',
 				type: 'options',
 				displayOptions: { show: { resource: ['label'], operation: ['addEntities', 'removeEntities'] } },
-				options: [{ name: 'Contact', value: 'contacts' }, { name: 'Account', value: 'accounts' }],
+				options: [{ name: 'Account', value: 'accounts' }, { name: 'Contact', value: 'contacts' }],
 				default: 'contacts',
 			},
 			{
@@ -1298,7 +1300,7 @@ export class Apollo implements INodeType {
 					results.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
 					continue;
 				}
-				throw error;
+				throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
 			}
 		}
 
