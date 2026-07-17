@@ -1,6 +1,6 @@
 {
   "name": "@apolloio/n8n-nodes-apollo",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Official n8n community node for Apollo.io — enrich people and organizations from Apollo's 275M+ contact database.",
   "keywords": [
     "n8n-community-node-package",
